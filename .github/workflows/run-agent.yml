@@ -1,0 +1,32 @@
+name: Smartsheet Past-Due Milestone Agent
+
+on:
+  schedule:
+    - cron: '0 13 * * 1-5'   # 7am Mountain (UTC)
+  workflow_dispatch:
+
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests pytz
+
+      - name: Run agent
+        env:
+          SMARTSHEET_TOKEN: ${{ secrets.SMARTSHEET_TOKEN }}
+          SMARTSHEET_SHEET_ID: ${{ secrets.SMARTSHEET_SHEET_ID }}
+          TIMEZONE: ${{ secrets.TIMEZONE }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          python smartsheet_past_due_agent_wide.py
